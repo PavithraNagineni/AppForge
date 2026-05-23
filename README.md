@@ -56,3 +56,17 @@ See `docs/config-schema.md` for the full config specification.
 ## Deployment
 
 See `docs/deployment.md` for Railway / Render / Vercel instructions.
+
+## Output
+When u first Sign-Up
+<img width="1920" height="1020" alt="Screenshot 2026-05-23 212210" src="https://github.com/user-attachments/assets/9700a811-72cd-4826-9bfe-80b0bc978d8a" />
+
+Sign-in
+<img width="1920" height="1020" alt="Screenshot 2026-05-23 212149" src="https://github.com/user-attachments/assets/603acba6-c970-4f86-8d0e-ca04511129d6" />
+
+DashBoard
+<img width="1920" height="1020" alt="Screenshot 2026-05-23 212235" src="https://github.com/user-attachments/assets/1cf2b3ec-4aa2-4bb3-a5d7-59c71e99b9af" />
+
+
+## Author
+   Pavithra Nagineni

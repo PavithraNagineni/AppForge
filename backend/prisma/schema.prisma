@@ -1,0 +1,99 @@
+// This is the AppForge "meta" schema.
+// AppForge stores app configs and their data in JSONB columns,
+// enabling fully dynamic schemas without runtime migrations.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String?   // null for OAuth-only users
+  name          String?
+  avatarUrl     String?
+  provider      String    @default("local") // "local" | "google"
+  providerId    String?   // Google sub
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  apps          App[]
+  records       AppRecord[]
+  notifications Notification[]
+
+  @@index([email])
+  @@index([provider, providerId])
+}
+
+// ─── Apps ─────────────────────────────────────────────────────────────────────
+
+model App {
+  id        String   @id @default(uuid())
+  slug      String   @unique // URL-safe name
+  config    Json     // Full AppConfig JSON
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  records   AppRecord[]
+
+  @@index([userId])
+  @@index([slug])
+}
+
+// ─── Dynamic Records ──────────────────────────────────────────────────────────
+// All entity data is stored here as JSONB rows.
+// entityName = "Product", "Order", etc. from the config.
+
+model AppRecord {
+  id         String   @id @default(uuid())
+  appId      String
+  app        App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  entityName String   // matches config entity name
+  data       Json     // the actual record fields
+  userId     String   // owner
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([appId, entityName])
+  @@index([userId])
+}
+
+// ─── CSV Imports ──────────────────────────────────────────────────────────────
+
+model CsvImport {
+  id          String   @id @default(uuid())
+  appId       String
+  entityName  String
+  fileName    String
+  rowCount    Int
+  columnMap   Json     // { csvColumn: entityField }
+  status      String   @default("pending") // pending | processing | done | error
+  error       String?
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("info") // info | success | warning | error
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
